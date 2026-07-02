@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const logger = require('../logger');
 const modelPath = process.env.USE_LOCAL_DB === 'true'
   ? '../models/petLocal'
   : process.env.USE_MEMORY_DB === 'true'
@@ -50,6 +51,7 @@ router.post('/', async (req, res, next) => {
       req.body.status = 'available';
     }
     const pet = await create(req.body);
+    logger.info('pet_created', { petId: pet.petId, name: pet.name, species: pet.species, price: pet.price, status: pet.status });
     res.status(201).json(pet);
   } catch (err) {
     next(err);
@@ -73,6 +75,7 @@ router.put('/:id', async (req, res, next) => {
     if (!pet) {
       return res.status(404).json({ error: 'Pet not found' });
     }
+    logger.info('pet_updated', { petId: pet.petId, name: pet.name, species: pet.species, price: pet.price, status: pet.status });
     res.status(200).json(pet);
   } catch (err) {
     next(err);
@@ -91,6 +94,7 @@ router.patch('/:id/status', async (req, res, next) => {
     if (!pet) {
       return res.status(404).json({ error: 'Pet not found' });
     }
+    logger.info('pet_status_changed', { petId: pet.petId, status: pet.status });
     res.status(200).json(pet);
   } catch (err) {
     next(err);
@@ -104,6 +108,7 @@ router.delete('/:id', async (req, res, next) => {
     if (!result) {
       return res.status(404).json({ error: 'Pet not found' });
     }
+    logger.info('pet_deleted', { petId: req.params.id });
     res.status(200).json(result);
   } catch (err) {
     next(err);
